@@ -1,4 +1,3 @@
-// FloorCreationModal.jsx - Beautiful Blue Theme
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -15,6 +14,12 @@ import MessageIcon from "@mui/icons-material/Message";
 import WindowIcon from "@mui/icons-material/Window";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
+import {
+  useCreateFloor,
+  useWatchFloorCreated,
+} from "@/app/hooks/CreateFloor/CreateFloor";
 
 const style = {
   position: "absolute",
@@ -35,11 +40,11 @@ const style = {
 };
 
 const windowsTintOptions = [
-  { value: "none", label: "No Tint", icon: "🔓" },
-  { value: "light", label: "Light", icon: "☀️" },
-  { value: "medium", label: "Medium", icon: "⛅" },
-  { value: "dark", label: "Dark", icon: "🌙" },
-  { value: "mirror", label: "Mirror", icon: "🪞" },
+  { value: "0", label: "No Tint", icon: "🔓" },
+  { value: "25", label: "Light", icon: "☀️" },
+  { value: "50", label: "Medium", icon: "⛅" },
+  { value: "75", label: "Dark", icon: "🌙" },
+  { value: "100", label: "Mirror", icon: "🪞" },
 ];
 
 const colorOptions = [
@@ -60,26 +65,21 @@ const colorOptions = [
 interface FloorCreationModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (formData: {
-    ownerName: string;
-    message: string;
-    link: string;
-    color: string;
-    windowsTint: string;
-  }) => void;
 }
 
 export default function FloorCreationModal({
   open,
   onClose,
-  onSubmit,
 }: FloorCreationModalProps) {
+  const { createFloor, isPending, isSuccess, isError, error } =
+    useCreateFloor();
+
   const [formData, setFormData] = React.useState({
     ownerName: "",
     message: "",
     link: "",
-    color: "#e3f2fd", // Default to a nice blue
-    windowsTint: "none",
+    color: "#e3f2fd",
+    windowsTint: "0",
   });
 
   const resetForm = () => {
@@ -88,7 +88,7 @@ export default function FloorCreationModal({
       message: "",
       link: "",
       color: "#e3f2fd",
-      windowsTint: "none",
+      windowsTint: "0",
     });
   };
 
@@ -97,6 +97,20 @@ export default function FloorCreationModal({
       resetForm();
     }
   }, [open]);
+
+  // Close modal on success
+  React.useEffect(() => {
+    if (isSuccess) {
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    }
+  }, [isSuccess, onClose]);
+
+  // Watch for new floor events
+  useWatchFloorCreated((logs) => {
+    console.log("New floor created:", logs);
+  });
 
   const handleChange =
     (field: string) =>
@@ -109,18 +123,24 @@ export default function FloorCreationModal({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (onSubmit) {
-      onSubmit(formData);
-    }
-    if (onClose) {
-      onClose();
-    }
+
+    // Convert hex color to uint256
+    const colorValue = BigInt(parseInt(formData.color.replace("#", ""), 16));
+    const windowsTintValue = BigInt(formData.windowsTint);
+
+    createFloor({
+      ownerName: formData.ownerName,
+      message: formData.message,
+      link: formData.link,
+      color: colorValue,
+      windowsTint: windowsTintValue,
+    });
   };
 
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={isPending ? undefined : onClose}
       aria-labelledby="floor-creation-modal"
       aria-describedby="modal-for-creating-new-floor"
       sx={{
@@ -172,6 +192,7 @@ export default function FloorCreationModal({
           </Box>
           <Button
             onClick={onClose}
+            disabled={isPending}
             sx={{
               minWidth: "auto",
               width: 36,
@@ -188,6 +209,18 @@ export default function FloorCreationModal({
           </Button>
         </Box>
 
+        {isSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Floor created successfully! 🎉
+          </Alert>
+        )}
+
+        {isError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Error: {error?.message || "Transaction failed"}
+          </Alert>
+        )}
+
         <Stack spacing={2.5}>
           <TextField
             required
@@ -195,6 +228,7 @@ export default function FloorCreationModal({
             label="Owner Name"
             value={formData.ownerName}
             onChange={handleChange("ownerName")}
+            disabled={isPending}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -218,6 +252,7 @@ export default function FloorCreationModal({
             label="Message"
             value={formData.message}
             onChange={handleChange("message")}
+            disabled={isPending}
             multiline
             rows={2}
             InputProps={{
@@ -243,6 +278,7 @@ export default function FloorCreationModal({
             label="Link"
             value={formData.link}
             onChange={handleChange("link")}
+            disabled={isPending}
             placeholder="https://example.com"
             InputProps={{
               startAdornment: (
@@ -285,6 +321,7 @@ export default function FloorCreationModal({
                 label="Floor Color"
                 value={formData.color}
                 onChange={handleChange("color")}
+                disabled={isPending}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -345,6 +382,7 @@ export default function FloorCreationModal({
                 label="Windows Tint"
                 value={formData.windowsTint}
                 onChange={handleChange("windowsTint")}
+                disabled={isPending}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -426,6 +464,7 @@ export default function FloorCreationModal({
             <Button
               onClick={onClose}
               variant="outlined"
+              disabled={isPending}
               sx={{
                 borderRadius: "10px",
                 px: 3,
@@ -443,8 +482,14 @@ export default function FloorCreationModal({
             <Button
               type="submit"
               variant="contained"
-              disabled={!formData.ownerName.trim()}
-              startIcon={<AddIcon />}
+              disabled={!formData.ownerName.trim() || isPending}
+              startIcon={
+                isPending ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <AddIcon />
+                )
+              }
               sx={{
                 borderRadius: "10px",
                 px: 3,
@@ -461,7 +506,7 @@ export default function FloorCreationModal({
                 },
               }}
             >
-              Create Floor
+              {isPending ? "Creating..." : "Create Floor"}
             </Button>
           </Stack>
         </Stack>

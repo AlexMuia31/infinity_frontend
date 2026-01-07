@@ -1,8 +1,9 @@
-import { Interface } from "ethers";
+import { type Address } from "viem";
 
-const contractAddress = "0x277B919a437CD65B98672957D1b6DC1411A88598";
+export const contractAddress =
+  "0x277B919a437CD65B98672957D1b6DC1411A88598" as Address;
 
-const ABI = new Interface([
+export const ABI = [
   {
     anonymous: false,
     inputs: [
@@ -131,4 +132,4 @@ const ABI = new Interface([
     stateMutability: "view",
     type: "function",
   },
-]);
+] as const;

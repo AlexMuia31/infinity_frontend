@@ -731,11 +731,7 @@ export default function Home() {
           </Container>
         </Box>
       )}
-      <FloorCreationModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmitFloor}
-      />
+      <FloorCreationModal open={modalOpen} onClose={handleCloseModal} />
     </Box>
   );
 }

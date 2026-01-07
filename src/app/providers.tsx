@@ -13,8 +13,8 @@ const config = getDefaultConfig({
   projectId: "YOUR_PROJECT_ID",
   chains: [mainnet, base],
   transports: {
-    [mainnet.id]: http("https://eth-mainnet.g.alchemy.com/v2/..."),
-    [base.id]: http("https://base-mainnet.g.alchemy.com/v2/..."),
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_MAINNET),
+    [base.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_BASE),
   },
 });
 
