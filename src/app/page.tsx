@@ -30,6 +30,7 @@ import {
 import { keyframes } from "@emotion/react";
 import InfinityTower from "./components/organisms/InfinityTower/InfinityTower";
 import FloorCreationModal from "./components/organisms/FloorCreationModal/FloorCreationModal";
+import { useAllFloors } from "./hooks/CreateFloor/CreateFloor";
 
 // Animations
 const floatAnimation = keyframes`
@@ -178,11 +179,7 @@ export default function Home() {
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
 
-  const handleSubmitFloor = (formData: Record<string, unknown>) => {
-    console.log("New floor created:", formData);
-    // Handle the form submission - send to backend, update state, etc.
-    handleCloseModal();
-  };
+  const { floors, isLoading, totalFloors } = useAllFloors();
 
   return (
     <Box sx={{ minHeight: "100vh" }}>
@@ -502,7 +499,7 @@ export default function Home() {
             <Grid container spacing={4}>
               {/* Tower Visualization */}
               <Grid size={{ xs: 12, md: 8 }}>
-                <InfinityTower />
+                <InfinityTower floors={floors} />
               </Grid>
 
               {/* Game Controls & Stats */}

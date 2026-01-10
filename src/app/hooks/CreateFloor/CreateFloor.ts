@@ -1,5 +1,6 @@
 import {
   useReadContract,
+  useReadContracts,
   useWriteContract,
   useWatchContractEvent,
 } from "wagmi";
@@ -43,6 +44,50 @@ export function useFloor(floorIndex: bigint) {
   });
 }
 
+// Hook to get all floors
+export function useAllFloors() {
+  const { data: nbFloors } = useNbFloors();
+  const floorCount = nbFloors ? Number(nbFloors) : 0;
+
+  // Create contracts array for batch reading
+  const contracts = Array.from({ length: floorCount }, (_, i) => ({
+    address: contractAddress,
+    abi: ABI as unknown as Abi,
+    functionName: "floors" as const,
+    args: [BigInt(i)],
+  }));
+
+  const { data, isLoading, isError } = useReadContracts({
+    contracts,
+  });
+
+  // Transform the data into a more usable format
+  const floors =
+    data?.map((result, index) => {
+      if (result.status === "success" && result.result) {
+        const [ownerName, message, link, color, windowsTint] =
+          result.result as [string, string, string, bigint, bigint];
+        return {
+          id: index,
+          ownerName,
+          message,
+          link,
+          color,
+          windowsTint,
+        };
+      }
+      return {
+        id: index,
+        ownerName: "",
+        message: "",
+        link: "",
+        color: 0n,
+        windowsTint: 0n,
+      };
+    }) || [];
+
+  return { floors, isLoading, isError, totalFloors: nbFloors };
+}
 // Hook to create a new floor
 export function useCreateFloor() {
   const { writeContract, ...rest } = useWriteContract();
