@@ -499,7 +499,7 @@ export default function Home() {
             <Grid container spacing={4}>
               {/* Tower Visualization */}
               <Grid size={{ xs: 12, md: 8 }}>
-                <InfinityTower floors={floors} />
+                <InfinityTower />
               </Grid>
 
               {/* Game Controls & Stats */}
