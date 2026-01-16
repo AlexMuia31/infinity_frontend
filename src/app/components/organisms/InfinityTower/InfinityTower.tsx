@@ -22,7 +22,7 @@ const InfinityTower = () => {
         {floors.map((floor, index) => (
           <Floor
             key={floor.id}
-            position={[0, index, 0]}
+            position={[0, index * 2, 0]}
             rotation={[0, Math.PI, index * 0.08]}
             color={colorToHex(floor.color)}
             windowsTint={floor.windowsTint.toString()}

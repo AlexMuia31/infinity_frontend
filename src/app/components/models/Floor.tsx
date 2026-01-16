@@ -33,24 +33,34 @@ export function Floor(props: React.ComponentProps<"group"> & FloorProps) {
   ) as unknown as GLTFResult;
   return (
     <group {...props} dispose={null}>
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder.geometry}
-        material={materials.Floor}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Cylinder_1.geometry}
-        material={materials.Glass}
-      />
+      <mesh castShadow receiveShadow geometry={nodes.Cylinder.geometry}>
+        <meshStandardMaterial
+          color={props.color}
+          side={THREE.DoubleSide}
+          roughness={0.6}
+          metalness={0.3}
+        />
+      </mesh>
+      <mesh castShadow receiveShadow geometry={nodes.Cylinder_1.geometry}>
+        <meshPhongMaterial
+          color={props.windowsTint}
+          transparent
+          opacity={0.7}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
       <mesh
         castShadow
         receiveShadow
         geometry={nodes.Cylinder_2.geometry}
         material={materials.Metal}
-      />
+      >
+        <meshStandardMaterial
+          color={"#888888"}
+          roughness={0.4}
+          metalness={0.8}
+        />
+      </mesh>
     </group>
   );
 }
