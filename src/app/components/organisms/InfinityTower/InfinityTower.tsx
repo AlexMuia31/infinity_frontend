@@ -1,12 +1,29 @@
 import { useAllFloors } from "@/app/hooks/CreateFloor/CreateFloor";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import React from "react";
 import { Floor } from "../../models/Floor";
 import { Card, CardContent, Typography, Box } from "@mui/material";
+import { ScrollableGroup } from "../../controls/ScrollableGroup";
+import { EffectComposer, NoiseEffect } from "postprocessing";
 
 export function colorToHex(color: bigint): string {
   return `#${color.toString(16).padStart(6, "0")}`;
 }
+
+const NoiseEffectComponent = () => {
+  const { gl } = useThree();
+
+  React.useEffect(() => {
+    const effectComposer = new EffectComposer(gl);
+    const noiseEffect = new NoiseEffect();
+
+    return () => {
+      effectComposer.dispose();
+    };
+  }, [gl]);
+
+  return null;
+};
 
 const InfinityTower = () => {
   const { floors, isLoading, totalFloors } = useAllFloors();
@@ -34,15 +51,18 @@ const InfinityTower = () => {
           <pointLight position={[20, 30, 10]} />
           <pointLight position={[20, 30, 10]} color="blue" />
           <spotLight position={[-2, -1, 32]} angle={0.2} intensity={1} />
-          {floors.map((floor, index) => (
-            <Floor
-              key={floor.id}
-              position={[0, index * 2, 0]}
-              rotation={[0, Math.PI, index * 0.08]}
-              color={colorToHex(floor.color)}
-              windowsTint={floor.windowsTint.toString()}
-            />
-          ))}
+          <ScrollableGroup scroll={scrollPosition} rotationSpeed={0.28}>
+            {floors.map((floor, index) => (
+              <Floor
+                key={floor.id}
+                position={[0, index * 2, 0]}
+                rotation={[0, Math.PI, index * 0.08]}
+                color={colorToHex(floor.color)}
+                windowsTint={floor.windowsTint.toString()}
+              />
+            ))}
+          </ScrollableGroup>
+          <NoiseEffectComponent />
         </Canvas>
       </div>
       {floors.map((floor, index) => (
