@@ -148,7 +148,7 @@ const GameContainer = styled(Box)(({ theme }) => ({
 const GameCard = styled(Card)(({ theme }) => ({
   background: `linear-gradient(145deg, ${alpha("#1a1a4a", 0.9)}, ${alpha(
     "#0a0a2a",
-    0.95
+    0.95,
   )})`,
   borderRadius: "30px",
   backdropFilter: "blur(20px)",
@@ -303,7 +303,7 @@ export default function Home() {
                         onClick={() => {
                           (
                             document.querySelector(
-                              '[data-testid="rk-connect-button"]'
+                              '[data-testid="rk-connect-button"]',
                             ) as HTMLElement
                           )?.click();
                         }}
@@ -722,8 +722,8 @@ export default function Home() {
         >
           <Container maxWidth="md">
             <Typography variant="body2" sx={{ color: alpha("#fff", 0.6) }}>
-              Infinity Tower © 2024 • Built on Ethereum • Connect with MetaMask,
-              Coinbase Wallet, or WalletConnect
+              Infinity Tower © {new Date().getFullYear()} • Built on Ethereum •
+              Connect with MetaMask, Coinbase Wallet, or WalletConnect
             </Typography>
           </Container>
         </Box>
